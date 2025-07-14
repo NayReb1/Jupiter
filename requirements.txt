@@ -1,2 +1,5 @@
 discord.py
 flask
+python-dotenv
+aiohttp
+requests
