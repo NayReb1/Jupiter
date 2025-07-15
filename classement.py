@@ -8,7 +8,6 @@ ROLE_JOUEUR_ID = 1131231592015216723
 ROLE_MONSTRE_ID = 1385977719539499079
 
 scheduler = AsyncIOScheduler()
-scheduler.start()
 
 def get_stats():
     conn = sqlite3.connect("stats.db")
