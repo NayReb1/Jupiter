@@ -13,11 +13,16 @@ from keep_alive import keep_alive
 load_dotenv()
 token = os.getenv("DISCORD_TOKEN")
 
+from classement import scheduler
+
 intents = discord.Intents.all()
 bot = commands.Bot(command_prefix="!", intents=intents)
 
-from classement import scheduler
-scheduler.start()
+@bot.event
+async def on_ready():
+    print(f"✅ Jupiter connecté : {bot.user}")
+    scheduler.start()
+    print("🕛 Classement hebdo activé — prochaine exécution dimanche à 12h")
 
 # Connexion à la base de données
 conn = sqlite3.connect("stats.db")
