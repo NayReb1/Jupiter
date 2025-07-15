@@ -32,41 +32,40 @@ def get_stats():
 async def envoyer_classement():
     stats = get_stats()
     if not stats:
+        print("📭 Aucun joueur à classer cette semaine.")
         return
 
     # Calcul MVP
     top_mvp = max(stats, key=lambda x: x["mvp_count"])
-
     # Calcul WinRate
     top_winrate = max(stats, key=lambda x: x["winrate"])
 
-    # Récupération du serveur
-    guild = discord.utils.get(discord.Client().guilds)  # À adapter selon ton bot
+    # Récupération du bot et du serveur
+    for guild in discord.Client().guilds:
+        role_monstre = discord.utils.get(guild.roles, id=ROLE_MONSTRE_ID)
+        channel = guild.get_channel(SALON_ID)
 
-    role_monstre = discord.utils.get(guild.roles, id=ROLE_MONSTRE_ID)
-    channel = guild.get_channel(SALON_ID)
+        # Retirer le rôle "monstre" à tous
+        for member in guild.members:
+            if role_monstre in member.roles:
+                await member.remove_roles(role_monstre)
 
-    # Retirer le rôle "monstre" à tout le monde
-    for member in guild.members:
-        if role_monstre in member.roles:
-            await member.remove_roles(role_monstre)
+        # Ajouter le rôle aux champions
+        for user_id in [top_mvp["user_id"], top_winrate["user_id"]]:
+            member = guild.get_member(int(user_id))
+            if member:
+                await member.add_roles(role_monstre)
 
-    # Ajouter le rôle "monstre" aux deux gagnants
-    for user_id in [top_mvp["user_id"], top_winrate["user_id"]]:
-        member = guild.get_member(int(user_id))
-        if member:
-            await member.add_roles(role_monstre)
+        # Envoyer le message de classement
+        await channel.send(
+            f"<@&{ROLE_JOUEUR_ID}> 🌟 **Classement Final de la Semaine**\n\n"
+            f"🥇 **MVP** : <@{top_mvp['user_id']}> ({top_mvp['mvp_count']} mentions !)\n"
+            f"🎯 **WinRate** : <@{top_winrate['user_id']}> ({top_winrate['winrate']:.2%})\n\n"
+            f"👑 Le rôle **MONSTRE** a été attribué aux deux champions 🔥\n"
+            f"🔁 Rendez-vous dimanche prochain à 12h !"
+        )
 
-    # Envoi du message dans le salon
-    await channel.send(
-        f"<@&{ROLE_JOUEUR_ID}> 🌟 **Classement Final de la Semaine**\n\n"
-        f"🥇 **MVP** : <@{top_mvp['user_id']}> ({top_mvp['mvp_count']} mentions !)\n"
-        f"🎯 **WinRate** : <@{top_winrate['user_id']}> ({top_winrate['winrate']:.2%})\n\n"
-        f"👑 Le rôle **MONSTRE** a été attribué aux deux champions 🔥\n"
-        f"🔁 Rendez-vous dimanche prochain à 12h !"
-    )
-
-    # Reset des stats pour la nouvelle semaine
+    # Reset des stats
     conn = sqlite3.connect("stats.db")
     cursor = conn.cursor()
     cursor.execute("DELETE FROM stats")
