@@ -6,6 +6,8 @@ import random
 from dotenv import load_dotenv
 import os
 
+from classement import envoyer_classement
+
 from keep_alive import keep_alive
 
 load_dotenv()
