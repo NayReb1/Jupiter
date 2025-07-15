@@ -4,4 +4,3 @@ python-dotenv
 aiohttp
 requests
 apscheduler
-sqlite3
