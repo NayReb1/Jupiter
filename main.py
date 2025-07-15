@@ -16,6 +16,9 @@ token = os.getenv("DISCORD_TOKEN")
 intents = discord.Intents.all()
 bot = commands.Bot(command_prefix="!", intents=intents)
 
+from classement import scheduler
+scheduler.start()
+
 # Connexion à la base de données
 conn = sqlite3.connect("stats.db")
 cur = conn.cursor()
